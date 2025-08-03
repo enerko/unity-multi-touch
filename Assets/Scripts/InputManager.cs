@@ -33,5 +33,6 @@ public class InputManager : MonoBehaviour
     {
         Destroy(circleClones[finger.index]);
         circleClones[finger.index] = null;
+     
     }
 }
