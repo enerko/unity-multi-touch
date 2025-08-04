@@ -1,15 +1,16 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 public class TouchManager : MonoBehaviour
 {
-    private Dictionary<Finger, IDraggable> draggingObjects = new();
+    private Dictionary<Finger, IDraggable> _draggingObjects = new();
+    private List<IPinchable> _pinchingObjects = new();
 
     public void OnEnable()
     {
-        Debug.Log("enabled");
         EnhancedTouchSupport.Enable();
         TouchSimulation.Enable();
 
@@ -30,6 +31,30 @@ public class TouchManager : MonoBehaviour
 
     public void HandleFingerDown(Finger finger)
     {
+        Debug.Log($"Finger {finger.index} down at {finger.screenPosition}");
+
+        // Start pinching
+        if (Touch.activeFingers.Count == 2)
+        {
+            Vector2 pointA = Camera.main.ScreenToWorldPoint(Touch.activeFingers[0].screenPosition);
+            Vector2 pointB = Camera.main.ScreenToWorldPoint(Touch.activeFingers[1].screenPosition);
+
+            Collider2D pinchArea = Physics2D.OverlapArea(pointA, pointB);
+
+            if (pinchArea != null)
+            {
+                IPinchable pinchable = pinchArea.GetComponent<IPinchable>();
+                if (pinchable != null)
+                {
+                    _pinchingObjects.Add(pinchable);
+                    pinchable.OnPinchStart(pointA, pointB);
+                }
+            }
+            return;
+        }
+
+        // Start dragging
+
         // Convert finger position to world position
         Vector2 worldPos = Camera.main.ScreenToWorldPoint(finger.screenPosition);
         Collider2D hit = Physics2D.OverlapPoint(worldPos);
@@ -41,7 +66,7 @@ public class TouchManager : MonoBehaviour
 
             if (draggable != null)
             {
-                draggingObjects[finger] = draggable;
+                _draggingObjects[finger] = draggable;
                 draggable.OnDragStart(finger, worldPos);
             }
         }
@@ -49,7 +74,18 @@ public class TouchManager : MonoBehaviour
 
     private void HandleFingerMove(Finger finger)
     {
-        if (draggingObjects.TryGetValue(finger, out IDraggable draggable))
+        // Handle pinching
+        if (Touch.activeFingers.Count == 2)
+        {
+            Vector2 pointA = Camera.main.ScreenToWorldPoint(Touch.activeFingers[0].screenPosition);
+            Vector2 pointB = Camera.main.ScreenToWorldPoint(Touch.activeFingers[1].screenPosition);
+
+            _pinchingObjects[0].OnPinchScale(pointA, pointB);
+            return;
+        }
+
+        // Handle dragging
+        if (_draggingObjects.TryGetValue(finger, out IDraggable draggable))
         {
             Vector2 worldPos = Camera.main.ScreenToWorldPoint(finger.screenPosition);
             draggable.OnDragMove(finger, worldPos);
@@ -58,10 +94,18 @@ public class TouchManager : MonoBehaviour
 
     public void HandleFingerUp(Finger finger)
     {
-        if (draggingObjects.TryGetValue(finger, out IDraggable draggable))
+        // Clear pinching
+        if (_pinchingObjects.Count > 0)
+        {
+            _pinchingObjects[0].OnPinchEnd();
+            _pinchingObjects.Clear();
+        }
+
+        // Clear dragging
+        if (_draggingObjects.TryGetValue(finger, out IDraggable draggable))
         {
             draggable.OnDragEnd(finger);
-            draggingObjects.Remove(finger);
+            _draggingObjects.Remove(finger);
         }
     }
 

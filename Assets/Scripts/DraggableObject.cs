@@ -7,6 +7,7 @@ public class DraggableObject : MonoBehaviour, IDraggable
     private Vector2 _offset;
     public void OnDragStart(Finger finger, Vector2 worldPos)
     {
+        LogManager.Instance.Log($"Drag started on {gameObject.name}");
         _offset = (Vector2)transform.position - worldPos;
         // Change color?
     }
@@ -17,6 +18,7 @@ public class DraggableObject : MonoBehaviour, IDraggable
     }
     public void OnDragEnd(Finger finger)
     {
+        LogManager.Instance.Log($"Drag ended on {gameObject.name}");
         // Change color?
     }
 
