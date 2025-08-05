@@ -8,6 +8,7 @@ public class TouchManager : MonoBehaviour
 {
     private Dictionary<Finger, IDraggable> _draggingObjects = new();
     private List<IPinchable> _pinchingObjects = new();
+    private List<IRotatable> _rotatingObjects = new();
 
     public void OnEnable()
     {
@@ -49,7 +50,15 @@ public class TouchManager : MonoBehaviour
                     _pinchingObjects.Add(pinchable);
                     pinchable.OnPinchStart(pointA, pointB);
                 }
+
+                IRotatable rotatable = pinchArea.GetComponent<IRotatable>();
+                if (rotatable != null)
+                {
+                    _rotatingObjects.Add(rotatable);
+                    rotatable.OnRotateStart(pointA, pointB);
+                }
             }
+
             return;
         }
 
@@ -81,6 +90,7 @@ public class TouchManager : MonoBehaviour
             Vector2 pointB = Camera.main.ScreenToWorldPoint(Touch.activeFingers[1].screenPosition);
 
             _pinchingObjects[0].OnPinchScale(pointA, pointB);
+            _rotatingObjects[0].OnRotateChange(pointA, pointB);
             return;
         }
 
@@ -99,6 +109,13 @@ public class TouchManager : MonoBehaviour
         {
             _pinchingObjects[0].OnPinchEnd();
             _pinchingObjects.Clear();
+        }
+
+        // Clear rotating
+        if (_rotatingObjects.Count > 0)
+        {
+            _rotatingObjects[0].OnRotateEnd();
+            _rotatingObjects.Clear();
         }
 
         // Clear dragging
