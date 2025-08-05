@@ -1,35 +1,35 @@
-using UnityEngine;
-using UnityEngine.UI;
-using System.Collections.Generic;
 using TMPro;
+using UnityEngine;
+using System.Collections.Generic;
+using System.Xml.Serialization;
 
 public class LogManager : MonoBehaviour
 {
-    public static LogManager Instance { get; private set; }
-
     [SerializeField] private TextMeshProUGUI _logText;
-    [SerializeField] private int _maxLines = 15;
+    [SerializeField] private int _maxLines = 10;
 
-    private Queue<string> _logLines = new Queue<string>();
+    private readonly Queue<string> _logQueue = new();
 
-    private void Awake()
+    void OnEnable()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
+        Application.logMessageReceived += HandleLog;
     }
 
-    public void Log(string message)
+    void OnDisable()
     {
-        if (_logLines.Count >= _maxLines)
-        {
-            _logLines.Dequeue();
-        }
+        Application.logMessageReceived -= HandleLog;
+    }
 
-        _logLines.Enqueue(message);
-        _logText.text = string.Join("\n", _logLines);
+    void HandleLog(string logString, string stackTrace, LogType type)
+    {
+        if (type == LogType.Log)
+        {
+            if (_logQueue.Count >= _maxLines)
+                _logQueue.Dequeue();
+
+            _logQueue.Enqueue(logString);
+
+            _logText.text = string.Join("\n", _logQueue);
+        }
     }
 }

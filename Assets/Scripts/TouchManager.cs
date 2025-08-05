@@ -15,7 +15,7 @@ public class TouchManager : MonoBehaviour
 
     void Awake()
     {
-        _dragHandler = new DragHandler();
+        _dragHandler = gameObject.AddComponent<DragHandler>();
     }
 
     public void OnEnable()

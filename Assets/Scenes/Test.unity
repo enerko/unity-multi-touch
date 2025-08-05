@@ -709,7 +709,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _logText: {fileID: 994901389}
-  _maxLines: 15
+  _maxLines: 10
 --- !u!4 &1940439109
 Transform:
   m_ObjectHideFlags: 0

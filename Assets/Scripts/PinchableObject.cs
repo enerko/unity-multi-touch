@@ -7,7 +7,7 @@ public class PinchableObject : MonoBehaviour, IPinchable
 
     public void OnPinchStart(Vector2 pointA, Vector2 pointB)
     {
-        LogManager.Instance.Log($"Pinch started on {gameObject.name}");
+        Debug.Log($"Pinch started on {gameObject.name}");
         _initialScale = transform.localScale; 
         _initialDistance = Vector2.Distance(pointA, pointB);
     }
@@ -22,7 +22,7 @@ public class PinchableObject : MonoBehaviour, IPinchable
 
     public void OnPinchEnd()
     {
-        LogManager.Instance.Log($"Pinch ended on {gameObject.name}");
+        Debug.Log($"Pinch ended on {gameObject.name}");
     }
 
 }
