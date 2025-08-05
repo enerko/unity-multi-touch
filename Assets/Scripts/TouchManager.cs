@@ -1,14 +1,22 @@
 using System.Collections.Generic;
-using TMPro;
+using System.Reflection;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 public class TouchManager : MonoBehaviour
 {
-    private Dictionary<Finger, IDraggable> _draggingObjects = new();
+    
     private List<IPinchable> _pinchingObjects = new();
     private List<IRotatable> _rotatingObjects = new();
+
+    private DragHandler _dragHandler;
+
+    void Awake()
+    {
+        _dragHandler = new DragHandler();
+    }
 
     public void OnEnable()
     {
@@ -18,6 +26,9 @@ public class TouchManager : MonoBehaviour
         Touch.onFingerDown += HandleFingerDown;
         Touch.onFingerMove += HandleFingerMove;
         Touch.onFingerUp += HandleFingerUp;
+
+        Touch.onFingerMove += _dragHandler.TryUpdateDrag;
+        Touch.onFingerUp += _dragHandler.TryEndDrag;
     }
 
     public void OnDisable()
@@ -25,6 +36,10 @@ public class TouchManager : MonoBehaviour
         Touch.onFingerDown -= HandleFingerDown;
         Touch.onFingerMove -= HandleFingerMove;
         Touch.onFingerUp -= HandleFingerUp;
+
+        // Drag
+        Touch.onFingerMove -= _dragHandler.TryUpdateDrag;
+        Touch.onFingerUp -= _dragHandler.TryEndDrag;
 
         EnhancedTouchSupport.Disable();
         TouchSimulation.Disable();
@@ -35,70 +50,20 @@ public class TouchManager : MonoBehaviour
         Debug.Log($"Finger {finger.index} down at {finger.screenPosition}");
 
         // Start pinching
-        if (Touch.activeFingers.Count == 2)
+        if (Touch.activeFingers.Count >= 2)
         {
-            Vector2 pointA = Camera.main.ScreenToWorldPoint(Touch.activeFingers[0].screenPosition);
-            Vector2 pointB = Camera.main.ScreenToWorldPoint(Touch.activeFingers[1].screenPosition);
-
-            Collider2D pinchArea = Physics2D.OverlapArea(pointA, pointB);
-
-            if (pinchArea != null)
-            {
-                IPinchable pinchable = pinchArea.GetComponent<IPinchable>();
-                if (pinchable != null)
-                {
-                    _pinchingObjects.Add(pinchable);
-                    pinchable.OnPinchStart(pointA, pointB);
-                }
-
-                IRotatable rotatable = pinchArea.GetComponent<IRotatable>();
-                if (rotatable != null)
-                {
-                    _rotatingObjects.Add(rotatable);
-                    rotatable.OnRotateStart(pointA, pointB);
-                }
-            }
-
-            return;
+            TryStartPinchAndRotate();
         }
 
-        // Start dragging
-
-        // Convert finger position to world position
-        Vector2 worldPos = Camera.main.ScreenToWorldPoint(finger.screenPosition);
-        Collider2D hit = Physics2D.OverlapPoint(worldPos);
-
-        if (hit != null)
-        {
-            // Check if the finger position overlaps with a draggable object
-            IDraggable draggable = hit.GetComponent<IDraggable>();
-
-            if (draggable != null)
-            {
-                _draggingObjects[finger] = draggable;
-                draggable.OnDragStart(finger, worldPos);
-            }
-        }
+        _dragHandler.TryStartDrag(finger);
     }
 
     private void HandleFingerMove(Finger finger)
     {
         // Handle pinching
-        if (Touch.activeFingers.Count == 2)
+        if (Touch.activeFingers.Count >= 2)
         {
-            Vector2 pointA = Camera.main.ScreenToWorldPoint(Touch.activeFingers[0].screenPosition);
-            Vector2 pointB = Camera.main.ScreenToWorldPoint(Touch.activeFingers[1].screenPosition);
-
-            _pinchingObjects[0].OnPinchScale(pointA, pointB);
-            _rotatingObjects[0].OnRotateChange(pointA, pointB);
-            return;
-        }
-
-        // Handle dragging
-        if (_draggingObjects.TryGetValue(finger, out IDraggable draggable))
-        {
-            Vector2 worldPos = Camera.main.ScreenToWorldPoint(finger.screenPosition);
-            draggable.OnDragMove(finger, worldPos);
+            TryUpdatePinchAndRotate();
         }
     }
 
@@ -117,13 +82,41 @@ public class TouchManager : MonoBehaviour
             _rotatingObjects[0].OnRotateEnd();
             _rotatingObjects.Clear();
         }
+    }
 
-        // Clear dragging
-        if (_draggingObjects.TryGetValue(finger, out IDraggable draggable))
+    private void TryStartPinchAndRotate()
+    {
+        Vector2 pointA = Camera.main.ScreenToWorldPoint(Touch.activeFingers[0].screenPosition);
+        Vector2 pointB = Camera.main.ScreenToWorldPoint(Touch.activeFingers[1].screenPosition);
+
+        Collider2D pinchArea = Physics2D.OverlapArea(pointA, pointB);
+
+        if (pinchArea != null)
         {
-            draggable.OnDragEnd(finger);
-            _draggingObjects.Remove(finger);
+            IPinchable pinchable = pinchArea.GetComponent<IPinchable>();
+            if (pinchable != null)
+            {
+                _pinchingObjects.Add(pinchable);
+                pinchable.OnPinchStart(pointA, pointB);
+            }
+
+            IRotatable rotatable = pinchArea.GetComponent<IRotatable>();
+            if (rotatable != null)
+            {
+                _rotatingObjects.Add(rotatable);
+                rotatable.OnRotateStart(pointA, pointB);
+            }
         }
     }
 
+    private void TryUpdatePinchAndRotate()
+    {
+        Vector2 pointA = Camera.main.ScreenToWorldPoint(Touch.activeFingers[0].screenPosition);
+        Vector2 pointB = Camera.main.ScreenToWorldPoint(Touch.activeFingers[1].screenPosition);
+
+        _pinchingObjects[0].OnPinchScale(pointA, pointB);
+        _rotatingObjects[0].OnRotateChange(pointA, pointB);
+    }
+
+    
 }
