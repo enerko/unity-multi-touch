@@ -5,18 +5,18 @@ using UnityEngine.InputSystem.EnhancedTouch;
 public class DraggableObject : MonoBehaviour, IDraggable
 {
     private Vector2 _offset;
-    public void OnDragStart(Finger finger, Vector2 worldPos)
+    public void OnDragStart(Vector2 worldPos)
     {
         Debug.Log($"Drag started on {gameObject.name}");
         _offset = (Vector2)transform.position - worldPos;
         // Change color?
     }
     
-    public void OnDragMove(Finger finger, Vector2 worldPos)
+    public void OnDragUpdate(Vector2 worldPos)
     {
         transform.position = worldPos + _offset;
     }
-    public void OnDragEnd(Finger finger)
+    public void OnDragEnd()
     {
         Debug.Log($"Drag ended on {gameObject.name}");
         // Change color?

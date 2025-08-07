@@ -12,7 +12,7 @@ public class PinchableObject : MonoBehaviour, IPinchable
         _initialDistance = Vector2.Distance(pointA, pointB);
     }
 
-    public void OnPinchScale(Vector2 pointA, Vector2 pointB)
+    public void OnPinchUpdate(Vector2 pointA, Vector2 pointB)
     {
         float distance = Vector2.Distance(pointA, pointB);
 

@@ -11,7 +11,7 @@ public class RotatableObject : MonoBehaviour, IRotatable
         _initialVector = pointA - pointB;
     }
 
-    public void OnRotateChange(Vector2 pointA, Vector2 pointB)
+    public void OnRotateUpdate(Vector2 pointA, Vector2 pointB)
     {
         Vector2 currentVector = pointB - pointA;
         float deltaAngle = Vector2.SignedAngle(_initialVector, currentVector);
