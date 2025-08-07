@@ -94,6 +94,8 @@ public class TouchManager : MonoBehaviour
 
     private void StartVisualizeTouch(Finger finger)
     {
+        if (!DebugParameters.IsVisualizeTouch) return;
+
         Vector2 fingerPosition = Camera.main.ScreenToWorldPoint(finger.currentTouch.screenPosition);
         GameObject clone = Instantiate(_touchCirclePrefab, fingerPosition, Quaternion.identity);
 
@@ -102,6 +104,8 @@ public class TouchManager : MonoBehaviour
 
     private void UpdateVisualizeTouch(Finger finger)
     {
+        if (!DebugParameters.IsVisualizeTouch) return;
+
         Vector2 fingerPosition = Camera.main.ScreenToWorldPoint(finger.currentTouch.screenPosition);
 
         _touchCircleClones[finger.index].transform.position = fingerPosition;
@@ -109,6 +113,8 @@ public class TouchManager : MonoBehaviour
 
     private void EndVisualizeTouch(Finger finger)
     {
+        if (!DebugParameters.IsVisualizeTouch) return;
+
         Destroy(_touchCircleClones[finger.index]);
         _touchCircleClones[finger.index] = null;
     }
