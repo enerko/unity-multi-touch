@@ -1,7 +1,4 @@
-using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
@@ -10,6 +7,9 @@ public class TouchManager : MonoBehaviour
     private DragHandler _dragHandler;
     private PinchHandler _pinchHandler;
     private RotateHandler _rotateHandler;
+
+    [SerializeField] private GameObject _touchCirclePrefab;
+    private GameObject[] _touchCircleClones = new GameObject[10]; // Assuming only 10 fingers are used
 
     void Awake()
     {
@@ -40,12 +40,13 @@ public class TouchManager : MonoBehaviour
 
     public void HandleFingerDown(Finger finger)
     {
-        Debug.Log($"Finger {finger.index} down at {finger.screenPosition}");
-
+        LogManager.Instance.LogInfo("Input", $"Finger {finger.index} down");
 
 
         // Visualize 
+        StartVisualizeTouch(finger);
 
+        // Ignore if there are already 2 fingers down
 
         Vector2 pointA = Camera.main.ScreenToWorldPoint(Touch.activeFingers[0].screenPosition);
 
@@ -63,6 +64,10 @@ public class TouchManager : MonoBehaviour
 
     private void HandleFingerMove(Finger finger)
     {
+        // Ignore if it is the 3rd finger or above
+
+        UpdateVisualizeTouch(finger);
+
         Vector2 pointA = Camera.main.ScreenToWorldPoint(Touch.activeFingers[0].screenPosition);
 
         // Handle pinching
@@ -78,8 +83,33 @@ public class TouchManager : MonoBehaviour
 
     public void HandleFingerUp(Finger finger)
     {
+        LogManager.Instance.LogInfo("Input", $"Finger {finger.index} released");
+
         _dragHandler.TryEndDrag();
         _pinchHandler.TryEndPinch();
         _rotateHandler.TryEndRotate();
+
+        EndVisualizeTouch(finger);
+    }
+
+    private void StartVisualizeTouch(Finger finger)
+    {
+        Vector2 fingerPosition = Camera.main.ScreenToWorldPoint(finger.currentTouch.screenPosition);
+        GameObject clone = Instantiate(_touchCirclePrefab, fingerPosition, Quaternion.identity);
+
+        _touchCircleClones[finger.index] = clone;
+    }
+
+    private void UpdateVisualizeTouch(Finger finger)
+    {
+        Vector2 fingerPosition = Camera.main.ScreenToWorldPoint(finger.currentTouch.screenPosition);
+
+        _touchCircleClones[finger.index].transform.position = fingerPosition;
+    }
+
+    private void EndVisualizeTouch(Finger finger)
+    {
+        Destroy(_touchCircleClones[finger.index]);
+        _touchCircleClones[finger.index] = null;
     }
 }

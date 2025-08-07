@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem.EnhancedTouch;
 
 public class PinchHandler : MonoBehaviour
 {
@@ -16,16 +15,21 @@ public class PinchHandler : MonoBehaviour
                 _pinchingObject = pinchable;
                 pinchable.OnPinchStart(pointA, pointB);
             }
+            
+        }
+        else
+        {
+            LogManager.Instance.LogWarning("Pinch", $"Pinch attempted but no pinchable component found at area between {pointA} and {pointB}");
         }
     }
 
     public void TryUpdatePinch(Vector2 pointA, Vector2 pointB)
     {
-        _pinchingObject.OnPinchUpdate(pointA, pointB);
+        _pinchingObject?.OnPinchUpdate(pointA, pointB);
     }
 
     public void TryEndPinch()
     {
-        _pinchingObject.OnPinchEnd();
+        _pinchingObject?.OnPinchEnd();
     }
 }

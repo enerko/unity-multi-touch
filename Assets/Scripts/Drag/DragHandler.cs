@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem.EnhancedTouch;
 
 public class DragHandler : MonoBehaviour
 {
@@ -8,20 +7,21 @@ public class DragHandler : MonoBehaviour
     public void TryStartDrag(Vector2 point)
     {
         // TODO?: If dragging is already taking place, should not override until released
-
-        
         Collider2D hit = Physics2D.OverlapPoint(point);
 
         if (hit != null)
         {
             // Check if the finger position overlaps with a draggable object
-            
             if (hit.TryGetComponent<IDraggable>(out var draggable))
             {
-                Debug.Log("Starting drag");
                 _draggingObject = draggable;
                 draggable.OnDragStart(point);
             }
+            
+        }
+        else
+        {
+            LogManager.Instance.LogWarning("Drag", $"Drag attempted but no draggable component found at {point}");
         }
     }
 

@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem.EnhancedTouch;
 
 public class RotateHandler : MonoBehaviour
 {
@@ -17,15 +16,19 @@ public class RotateHandler : MonoBehaviour
                 _rotatableObject.OnRotateStart(pointA, pointB);
             }
         }
+        else
+        {
+            LogManager.Instance.LogWarning("Rotate", $"Rotate attempted but no rotatable component found at area between {pointA} and {pointB}");
+        }
     }
 
     public void TryUpdateRotate(Vector2 pointA, Vector2 pointB)
     {
-        _rotatableObject.OnRotateUpdate(pointA, pointB);
+        _rotatableObject?.OnRotateUpdate(pointA, pointB);
     }
 
     public void TryEndRotate()
     {
-        _rotatableObject.OnRotateEnd();
+        _rotatableObject?.OnRotateEnd();
     }
 }

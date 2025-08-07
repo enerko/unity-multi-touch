@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem.EnhancedTouch;
 
 [RequireComponent(typeof(Collider2D))]
 public class DraggableObject : MonoBehaviour, IDraggable
@@ -7,7 +6,7 @@ public class DraggableObject : MonoBehaviour, IDraggable
     private Vector2 _offset;
     public void OnDragStart(Vector2 worldPos)
     {
-        Debug.Log($"Drag started on {gameObject.name}");
+        LogManager.Instance.LogInfo("Drag", $"Drag started on {gameObject.name}");
         _offset = (Vector2)transform.position - worldPos;
         // Change color?
     }
@@ -18,8 +17,8 @@ public class DraggableObject : MonoBehaviour, IDraggable
     }
     public void OnDragEnd()
     {
-        Debug.Log($"Drag ended on {gameObject.name}");
         // Change color?
+        LogManager.Instance.LogInfo("Drag", $"Drag ended on {gameObject.name}");
     }
 
 }
