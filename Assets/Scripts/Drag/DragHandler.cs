@@ -21,7 +21,7 @@ public class DragHandler : MonoBehaviour
         }
         else
         {
-            LogManager.Instance.LogWarning("Drag", $"Drag attempted but no draggable component found at {point}");
+            LogManager.Instance.LogInfo("Drag", $"Drag attempted but no draggable component found at {point}");
         }
     }
 
@@ -40,7 +40,7 @@ public class DragHandler : MonoBehaviour
         // Clear dragging
         if (_draggingObject != null)
         {
-            _draggingObject.OnDragEnd();
+            _draggingObject?.OnDragEnd();
             _draggingObject = null;
         }
     }

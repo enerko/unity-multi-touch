@@ -18,7 +18,7 @@ public class RotateHandler : MonoBehaviour
         }
         else
         {
-            LogManager.Instance.LogWarning("Rotate", $"Rotate attempted but no rotatable component found at area between {pointA} and {pointB}");
+            LogManager.Instance.LogInfo("Rotate", $"Rotate attempted but no rotatable component found at area between {pointA} and {pointB}");
         }
     }
 
@@ -30,5 +30,6 @@ public class RotateHandler : MonoBehaviour
     public void TryEndRotate()
     {
         _rotatableObject?.OnRotateEnd();
+        _rotatableObject = null;
     }
 }

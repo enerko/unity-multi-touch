@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using TMPro;
 using UnityEngine;
 
@@ -11,6 +12,8 @@ public class LogManager : MonoBehaviour
     private readonly Queue<string> _logQueue = new();
 
     public static LogManager Instance { get; private set; }
+
+    private string _logFilePath;
 
     private void Awake()
     {
@@ -25,6 +28,9 @@ public class LogManager : MonoBehaviour
 
     void OnEnable()
     {
+        _logFilePath = Path.Combine(Application.persistentDataPath, "log.txt");
+        File.WriteAllText(_logFilePath, string.Empty); // Clear file at session start
+
         Application.logMessageReceived += HandleLog;
     }
 
@@ -42,7 +48,7 @@ public class LogManager : MonoBehaviour
     public void LogWarning(string category, string message)
     {
         string logEntry = $"[{DateTime.Now:HH:mm:ss}] [{category}] [Warning] {message}";
-        Debug.Log(logEntry);
+        Debug.LogWarning(logEntry);
     }
 
     void HandleLog(string logString, string stackTrace, LogType type)
@@ -67,6 +73,19 @@ public class LogManager : MonoBehaviour
             _logQueue.Dequeue();
 
         _logQueue.Enqueue(logString);
-        _logText.text = string.Join("\n", _logQueue);
+
+        string logText = string.Join("\n", _logQueue);
+        _logText.text = logText;
+
+        // Save logs on a persistent file. Show stack traces if it is a type of warning, error, or exception,
+        string logEntry = logString;
+
+        if (type == LogType.Warning || type == LogType.Error || type == LogType.Exception)
+            logEntry += "\n" + stackTrace;
+
+        logEntry += "\n";
+
+        File.AppendAllText(_logFilePath, logEntry);
+
     }
 }

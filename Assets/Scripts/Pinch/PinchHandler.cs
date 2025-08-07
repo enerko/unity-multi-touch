@@ -19,7 +19,8 @@ public class PinchHandler : MonoBehaviour
         }
         else
         {
-            LogManager.Instance.LogWarning("Pinch", $"Pinch attempted but no pinchable component found at area between {pointA} and {pointB}");
+
+            LogManager.Instance.LogInfo("Pinch", $"Pinch attempted but no pinchable component found at area between {pointA} and {pointB}");
         }
     }
 
@@ -31,5 +32,6 @@ public class PinchHandler : MonoBehaviour
     public void TryEndPinch()
     {
         _pinchingObject?.OnPinchEnd();
+        _pinchingObject = null;
     }
 }
