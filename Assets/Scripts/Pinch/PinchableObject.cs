@@ -1,4 +1,5 @@
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 [RequireComponent(typeof(Collider2D))]
 public class PinchableObject : MonoBehaviour, IPinchable
@@ -7,7 +8,7 @@ public class PinchableObject : MonoBehaviour, IPinchable
     private float _initialDistance;
 
     private const float _minScale = 0.5f;
-    private const float _maxScale = 2.0f;
+    private const float _maxScale = 5.0f;
 
     public void OnPinchStart(Vector2 pointA, Vector2 pointB)
     {
@@ -31,6 +32,20 @@ public class PinchableObject : MonoBehaviour, IPinchable
         newScale.x = Mathf.Clamp(newScale.x, _minScale, _maxScale);
         newScale.y = Mathf.Clamp(newScale.y, _minScale, _maxScale);
         newScale.z = Mathf.Clamp(newScale.z, _minScale, _maxScale);
+
+        // Log if scale is at max
+        if (Mathf.Approximately(newScale.x, _maxScale) || Mathf.Approximately(newScale.y, _maxScale) ||
+            Mathf.Approximately(newScale.z, _maxScale))
+        {
+            LogManager.Instance.LogInfo("Pinch", $"Attempted to pinch but {gameObject.name} already reached max scale!");
+        }
+
+        // Log if scale is at min
+        if (Mathf.Approximately(newScale.x, _minScale) || Mathf.Approximately(newScale.y, _minScale) || 
+            Mathf.Approximately(newScale.z, _minScale))
+        {
+            LogManager.Instance.LogInfo("Pinch", $"Attempted to pinch but {gameObject.name} already reached min scale!");
+        }
 
         transform.localScale = newScale;
     }

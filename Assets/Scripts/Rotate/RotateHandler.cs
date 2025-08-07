@@ -6,14 +6,22 @@ public class RotateHandler : MonoBehaviour
 
     public void TryStartRotate(Vector2 pointA, Vector2 pointB)
     {
+        // Ignore if there is an ongoing process
+        if (_rotatableObject != null)
+            return;
+
         Collider2D rotateArea = Physics2D.OverlapArea(pointA, pointB);
 
         if (rotateArea != null)
         {
             if (rotateArea.TryGetComponent<IRotatable>(out var rotatable))
             {
-                _rotatableObject = rotatable;
-                _rotatableObject.OnRotateStart(pointA, pointB);
+                // Verify that there are no other objects currently interacted with
+                if (InteractionManager.TryStartInteraction(rotatable))
+                {
+                    _rotatableObject = rotatable;
+                    rotatable.OnRotateStart(pointA, pointB);
+                }
             }
         }
         else
@@ -29,6 +37,7 @@ public class RotateHandler : MonoBehaviour
 
     public void TryEndRotate()
     {
+        InteractionManager.EndInteraction(_rotatableObject);
         _rotatableObject?.OnRotateEnd();
         _rotatableObject = null;
     }

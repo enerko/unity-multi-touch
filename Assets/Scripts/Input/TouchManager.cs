@@ -42,24 +42,28 @@ public class TouchManager : MonoBehaviour
     {
         LogManager.Instance.LogInfo("Input", $"Finger {finger.index} down");
 
-
-        // Visualize 
         StartVisualizeTouch(finger);
 
-        // Ignore if there are already 2 fingers down
-
-        Vector2 pointA = Camera.main.ScreenToWorldPoint(Touch.activeFingers[0].screenPosition);
-
-        // Start pinching
+        // Start pinch/rotate only if this finger is one of the first two active fingers
         if (Touch.activeFingers.Count >= 2)
         {
-            Vector2 pointB = Camera.main.ScreenToWorldPoint(Touch.activeFingers[1].screenPosition);
+            var firstFinger = Touch.activeFingers[0];
+            var secondFinger = Touch.activeFingers[1];
 
-            _pinchHandler.TryStartPinch(pointA, pointB);
-            _rotateHandler.TryStartRotate(pointA, pointB);
+            if (finger == firstFinger || finger == secondFinger)
+            {
+                Vector2 pointA = Camera.main.ScreenToWorldPoint(firstFinger.screenPosition);
+                Vector2 pointB = Camera.main.ScreenToWorldPoint(secondFinger.screenPosition);
+
+                _pinchHandler.TryStartPinch(pointA, pointB);
+                _rotateHandler.TryStartRotate(pointA, pointB);
+                return; // skip drag for these fingers since pinch/rotate are starting
+            }
         }
 
-        _dragHandler.TryStartDrag(pointA);
+        // Otherwise, try drag for this finger
+        Vector2 worldPos = Camera.main.ScreenToWorldPoint(finger.screenPosition);
+        _dragHandler.TryStartDrag(worldPos);
     }
 
     private void HandleFingerMove(Finger finger)

@@ -533,6 +533,18 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1983254841}
     - target: {fileID: 5405905407295960905, guid: 855372a89a54fa848981f63faf82ba6c, type: 3}
+      propertyPath: m_margin.x
+      value: 31.872314
+      objectReference: {fileID: 0}
+    - target: {fileID: 5405905407295960905, guid: 855372a89a54fa848981f63faf82ba6c, type: 3}
+      propertyPath: m_margin.y
+      value: 41.263916
+      objectReference: {fileID: 0}
+    - target: {fileID: 5405905407295960905, guid: 855372a89a54fa848981f63faf82ba6c, type: 3}
+      propertyPath: m_margin.z
+      value: 89.776
+      objectReference: {fileID: 0}
+    - target: {fileID: 5405905407295960905, guid: 855372a89a54fa848981f63faf82ba6c, type: 3}
       propertyPath: m_fontColor.b
       value: 1
       objectReference: {fileID: 0}
@@ -545,8 +557,12 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5405905407295960905, guid: 855372a89a54fa848981f63faf82ba6c, type: 3}
+      propertyPath: m_overflowMode
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5405905407295960905, guid: 855372a89a54fa848981f63faf82ba6c, type: 3}
       propertyPath: m_fontColor32.rgba
-      value: 4294046193
+      value: 4294967295
       objectReference: {fileID: 0}
     - target: {fileID: 6293205511594833883, guid: 855372a89a54fa848981f63faf82ba6c, type: 3}
       propertyPath: m_Pivot.x
