@@ -62,7 +62,7 @@ public class TouchManager : MonoBehaviour
                 _rotateHandler.TryStartRotate(pointA, pointB);
             }
 
-            return; // skip drag for these fingers since pinch/rotate are starting
+            return; // Skip drag for these fingers since pinch/rotate are starting
         }
 
         // Otherwise, since we know this is the first finger, try drag

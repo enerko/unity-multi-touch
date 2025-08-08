@@ -53,22 +53,6 @@ public class LogManager : MonoBehaviour
 
     void HandleLog(string logString, string stackTrace, LogType type)
     {
-        string coloredLog;
-
-        switch (type)
-        {
-            case LogType.Error:
-            case LogType.Exception:
-                coloredLog = $"<color=red>{logString}</color>";
-                break;
-            case LogType.Warning:
-                coloredLog = $"<color=yellow>{logString}</color>";
-                break;
-            default:
-                coloredLog = logString;
-                break;
-        }
-
         if (_logQueue.Count >= _maxLines)
             _logQueue.Dequeue();
 
@@ -86,6 +70,5 @@ public class LogManager : MonoBehaviour
         logEntry += "\n";
 
         File.AppendAllText(_logFilePath, logEntry);
-
     }
 }

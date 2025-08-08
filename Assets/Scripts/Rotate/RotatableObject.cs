@@ -9,14 +9,18 @@ public class RotatableObject : MonoBehaviour, IRotatable
     {
         LogManager.Instance.LogInfo("Rotate", $"Rotate started on {gameObject.name} with angle {transform.eulerAngles.z}");
 
-        _initialVector = pointA - pointB;
+        // Calculate and store the initial vector between the two touch points
+        _initialVector = pointB - pointA;
     }
 
     public void OnRotateUpdate(Vector2 pointA, Vector2 pointB)
     {
         Vector2 currentVector = pointB - pointA;
+
+        // Determine the angle difference between the initial vector and the current one
         float deltaAngle = Vector2.SignedAngle(_initialVector, currentVector);
 
+        // Apply the rotation to the GameObject around the Z-axis
         transform.rotation *= Quaternion.Euler(0, 0, deltaAngle);
         _initialVector = currentVector;
     }

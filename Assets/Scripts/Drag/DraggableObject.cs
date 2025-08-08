@@ -14,6 +14,7 @@ public class DraggableObject : MonoBehaviour, IDraggable
     {
         transform.position = worldPos + _offset;
     }
+
     public void OnDragEnd()
     {
         LogManager.Instance.LogInfo("Drag", $"Drag ended on {gameObject.name} at {(Vector2)transform.position}");
