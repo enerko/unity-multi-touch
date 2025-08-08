@@ -9,7 +9,7 @@ public class InteractionManager
         var go = (target as MonoBehaviour).gameObject;
         if (_currentInteraction != null && _currentInteraction != go)
         {
-            LogManager.Instance.LogInfo("Interact", $"Attempted to interact with {go} but another interaction with {_currentInteraction} is already taking place");
+            LogManager.Instance.LogInfo("Interact", $"Attempted to interact with {go.name} but another interaction with {_currentInteraction.name} is already taking place");
             return false;
         }
             
