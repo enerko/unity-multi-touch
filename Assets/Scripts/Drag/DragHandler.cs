@@ -18,7 +18,7 @@ public class DragHandler : MonoBehaviour
             if (hit.TryGetComponent<IDraggable>(out var draggable))
             {
                 // Verify that there are no other objects currently interacted with
-                if (InteractionManager.TryStartInteraction(draggable))
+                if (InteractionManager.TryStartInteraction(draggable as IInteractable))
                 {
                     _draggingObject = draggable;
                     _draggingObject.OnDragStart(point);
@@ -38,8 +38,12 @@ public class DragHandler : MonoBehaviour
 
     public void TryEndDrag()
     {
-        InteractionManager.EndInteraction(_draggingObject);
-        _draggingObject?.OnDragEnd();
+        if (_draggingObject != null)
+        {
+            InteractionManager.EndInteraction(_draggingObject as IInteractable);
+            _draggingObject.OnDragEnd();
+        }
+        
         _draggingObject = null;
     }
 }

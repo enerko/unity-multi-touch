@@ -11,6 +11,8 @@ public class TouchManager : MonoBehaviour
     [SerializeField] private GameObject _touchCirclePrefab;
     private GameObject[] _touchCircleClones = new GameObject[10]; // Assuming only 10 fingers are used
 
+    private int _activeTouchCounter = 0;
+
     void Awake()
     {
         _dragHandler = gameObject.AddComponent<DragHandler>();
@@ -43,11 +45,40 @@ public class TouchManager : MonoBehaviour
         LogManager.Instance.LogInfo("Input", $"Finger {finger.index} down");
 
         StartVisualizeTouch(finger);
+        _activeTouchCounter++;
 
         // Start pinch/rotate only if this finger is one of the first two active fingers
-        if (Touch.activeFingers.Count >= 2)
+        if (_activeTouchCounter >= 2)
         {
             var firstFinger = Touch.activeFingers[0];
+            var secondFinger = Touch.activeFingers[1];
+
+            if (finger == Touch.activeFingers[0] || finger == Touch.activeFingers[1])
+            {
+                Vector2 pointA = Camera.main.ScreenToWorldPoint(firstFinger.screenPosition);
+                Vector2 pointB = Camera.main.ScreenToWorldPoint(secondFinger.screenPosition);
+
+                _pinchHandler.TryStartPinch(pointA, pointB);
+                _rotateHandler.TryStartRotate(pointA, pointB);
+            }
+
+            return; // skip drag for these fingers since pinch/rotate are starting
+        }
+
+        // Otherwise, since we know this is the first finger, try drag
+        Vector2 worldPos = Camera.main.ScreenToWorldPoint(finger.screenPosition);
+        _dragHandler.TryStartDrag(worldPos);
+    }
+
+    private void HandleFingerMove(Finger finger)
+    {
+        UpdateVisualizeTouch(finger);
+
+        var firstFinger = Touch.activeFingers[0];
+
+        // Start pinch/rotate only if this finger is one of the first two active fingers
+        if (_activeTouchCounter >= 2)
+        {
             var secondFinger = Touch.activeFingers[1];
 
             if (finger == firstFinger || finger == secondFinger)
@@ -55,50 +86,41 @@ public class TouchManager : MonoBehaviour
                 Vector2 pointA = Camera.main.ScreenToWorldPoint(firstFinger.screenPosition);
                 Vector2 pointB = Camera.main.ScreenToWorldPoint(secondFinger.screenPosition);
 
-                _pinchHandler.TryStartPinch(pointA, pointB);
-                _rotateHandler.TryStartRotate(pointA, pointB);
-                return; // skip drag for these fingers since pinch/rotate are starting
+                _pinchHandler.TryUpdatePinch(pointA, pointB);
+                _rotateHandler.TryUpdateRotate(pointA, pointB);
             }
         }
 
-        // Otherwise, try drag for this finger
-        Vector2 worldPos = Camera.main.ScreenToWorldPoint(finger.screenPosition);
-        _dragHandler.TryStartDrag(worldPos);
-    }
-
-    private void HandleFingerMove(Finger finger)
-    {
-        // Ignore if it is the 3rd finger or above
-
-        UpdateVisualizeTouch(finger);
-
-        Vector2 pointA = Camera.main.ScreenToWorldPoint(Touch.activeFingers[0].screenPosition);
-
-        // Handle pinching
-        if (Touch.activeFingers.Count >= 2)
+        // Only update drag if this is the first finger
+        if (finger == firstFinger)
         {
-            Vector2 pointB = Camera.main.ScreenToWorldPoint(Touch.activeFingers[1].screenPosition);
-            _pinchHandler.TryUpdatePinch(pointA, pointB);
-            _rotateHandler.TryUpdateRotate(pointA, pointB);
+            Vector2 worldPos = Camera.main.ScreenToWorldPoint(finger.screenPosition);
+            _dragHandler.TryUpdateDrag(worldPos);
         }
-
-        _dragHandler.TryUpdateDrag(pointA);
+        
     }
 
     public void HandleFingerUp(Finger finger)
     {
         LogManager.Instance.LogInfo("Input", $"Finger {finger.index} released");
+        _activeTouchCounter--;
 
-        _dragHandler.TryEndDrag();
-        _pinchHandler.TryEndPinch();
-        _rotateHandler.TryEndRotate();
+        if (_activeTouchCounter < 2)
+        {
+            _pinchHandler.TryEndPinch();
+            _rotateHandler.TryEndRotate();
+        }
+
+        if (_activeTouchCounter == 0)
+            _dragHandler.TryEndDrag();
 
         EndVisualizeTouch(finger);
     }
 
     private void StartVisualizeTouch(Finger finger)
     {
-        if (!DebugParameters.IsVisualizeTouch) return;
+        if (!DebugParameters.IsVisualizeTouch) 
+            return;
 
         Vector2 fingerPosition = Camera.main.ScreenToWorldPoint(finger.currentTouch.screenPosition);
         GameObject clone = Instantiate(_touchCirclePrefab, fingerPosition, Quaternion.identity);
@@ -108,7 +130,8 @@ public class TouchManager : MonoBehaviour
 
     private void UpdateVisualizeTouch(Finger finger)
     {
-        if (!DebugParameters.IsVisualizeTouch) return;
+        if (!DebugParameters.IsVisualizeTouch) 
+            return;
 
         Vector2 fingerPosition = Camera.main.ScreenToWorldPoint(finger.currentTouch.screenPosition);
 
@@ -117,7 +140,8 @@ public class TouchManager : MonoBehaviour
 
     private void EndVisualizeTouch(Finger finger)
     {
-        if (!DebugParameters.IsVisualizeTouch) return;
+        if (!DebugParameters.IsVisualizeTouch) 
+            return;
 
         Destroy(_touchCircleClones[finger.index]);
         _touchCircleClones[finger.index] = null;

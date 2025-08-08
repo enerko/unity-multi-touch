@@ -17,7 +17,7 @@ public class RotateHandler : MonoBehaviour
             if (rotateArea.TryGetComponent<IRotatable>(out var rotatable))
             {
                 // Verify that there are no other objects currently interacted with
-                if (InteractionManager.TryStartInteraction(rotatable))
+                if (InteractionManager.TryStartInteraction(rotatable as IInteractable))
                 {
                     _rotatableObject = rotatable;
                     rotatable.OnRotateStart(pointA, pointB);
@@ -37,8 +37,12 @@ public class RotateHandler : MonoBehaviour
 
     public void TryEndRotate()
     {
-        InteractionManager.EndInteraction(_rotatableObject);
-        _rotatableObject?.OnRotateEnd();
+        if (_rotatableObject != null)
+        {
+            InteractionManager.EndInteraction(_rotatableObject as IInteractable);
+            _rotatableObject.OnRotateEnd();
+        }    
+        
         _rotatableObject = null;
     }
 }

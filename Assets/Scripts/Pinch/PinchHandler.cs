@@ -17,7 +17,7 @@ public class PinchHandler : MonoBehaviour
             if (pinchArea.TryGetComponent<IPinchable>(out var pinchable))
             {
                 // Verify that there are no other objects currently interacted with
-                if (InteractionManager.TryStartInteraction(pinchable))
+                if (InteractionManager.TryStartInteraction(pinchable as IInteractable))
                 {
                     _pinchingObject = pinchable;
                     pinchable.OnPinchStart(pointA, pointB);
@@ -38,8 +38,12 @@ public class PinchHandler : MonoBehaviour
 
     public void TryEndPinch()
     {
-        InteractionManager.EndInteraction(_pinchingObject);
-        _pinchingObject?.OnPinchEnd();
+        if (_pinchingObject != null)
+        {
+            InteractionManager.EndInteraction(_pinchingObject as IInteractable);
+            _pinchingObject.OnPinchEnd();
+        }
+        
         _pinchingObject = null;
     }
 }
